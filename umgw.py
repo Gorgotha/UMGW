@@ -302,7 +302,19 @@ def tree_sinkhorn(root, eps, rho,
 
 def compute_local_cost(pi, a, dx, b, dy, eps, rho, rho2, complete_cost=True):
     """
-    Author: Thibault Séjourné <https://github.com/thibsej/unbalanced_gromov_wasserstein>
+    MIT License
+
+    Copyright (c) 2020 thibsej <https://github.com/thibsej/unbalanced_gromov_wasserstein>
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
     
     Compute the local cost by averaging the distortion with the current
     transport plan.
@@ -680,7 +692,7 @@ def UMGW_sep(r, eps, rho
     n_its_check_cvgce=10,
     sink_n_its_check_cvgce=10,
     pot_large=1e10,
-    verbose=False,log=False,max_time = np.inf,epsmode="normal",random_state = None):
+    verbose=False,log=False,max_time = np.inf,epsmode="normal",random_state = None,init = "rand",init_costs_pis=True):
     '''
     Computes (Unbalanced) Multi-marginal Gromov--Wasserstein Transport on a tree by alternately
     solving a local UMOT Problem using a Sinkhorn procedure and updating the local costs.
@@ -714,27 +726,35 @@ def UMGW_sep(r, eps, rho
     update = np.inf
     
     #initialize costs and pis
-    for node in forward:
-        if node.is_root:
-            node.pi = None
-            node.cost = None
-            continue
-        else:
-            if not hasattr(node,"t"):
-                node.t = 1
+    if init_costs_pis:
+        for node in forward:
+            if node.is_root:
+                node.pi = None
+                node.cost = None
+                continue
+            else:
+                if not hasattr(node,"t"):
+                    node.t = 1
 
-        if hasattr(node.parent,"mu"):
-            mu1 = node.parent.mu
-        else:
-            mu1 = torch.from_numpy(ot.unif(len(node.parent.M)))
-        if hasattr(node,"mu"):
-            mu2 = node.mu
-        else:
-            mu2 = torch.from_numpy(ot.unif(len(node.M)))
-           
-        node.pi = mu1[:,None] * mu2[None,:]
-        node.pi /= torch.sum(node.pi)
-        node.cost = node.t * compute_local_cost_sep(node.pi, mu1, node.parent.M, mu2, node.M, eps, node.parent.rho, node.rho,dx_sep = node.parent.sep,dy_sep = node.sep)
+            if hasattr(node.parent,"mu"):
+                mu1 = node.parent.mu
+            else:
+                mu1 = torch.from_numpy(ot.unif(len(node.parent.M)))
+            if hasattr(node,"mu"):
+                mu2 = node.mu
+            else:
+                mu2 = torch.from_numpy(ot.unif(len(node.M)))
+
+            #node.pi = mu1[:,None] * mu2[None,:]
+            if init == "rand":
+                node.pi = torch.from_numpy(np.random.random((len(mu1),len(mu2))))
+            else:
+                assert init == "prod"
+                node.pi = mu1[:,None] * mu2[None,:]
+
+            node.pi /= torch.sum(node.pi)
+
+            node.cost = node.t * compute_local_cost_sep(node.pi, mu1, node.parent.M, mu2, node.M, eps, node.parent.rho, node.rho,dx_sep = node.parent.sep,dy_sep = node.sep)
     
     #main loop
     i = 0
