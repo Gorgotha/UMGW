@@ -1,14 +1,15 @@
 # Multi-Marginal Gromov-Wasserstein Transport and Barycentres
 
 This repository contains the code for the paper 'Multi-Marginal Gromov-Wasserstein Transport and Barycentres'. 
+Information and Inference: A Journal of the IMA 12(4), pp. 2753–2781, 2023.
 A preprint version is available on [arXiv](https://arxiv.org/abs/2205.06725).
 
 Please cite the paper if you use the code.
 
 ## Citation
 1. Florian Beier, Robert Beinert, Gabriele Steidl,
-    'Multi-Marginal Gromov-Wasserstein Transport and Barycenters',
-    arXiv:2205.06725.
+   'Multi-Marginal Gromov-Wasserstein Transport and Barycenters',
+   Information and Inference: A Journal of the IMA 12(4), pp. 2753–2781, 2023.
 
 ## Requirements
 The simulations have been performed with Python 3.8.8 and rely on 
